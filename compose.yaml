@@ -1,0 +1,81 @@
+name: uniflow
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: uniflow
+      POSTGRES_USER: uniflow
+      POSTGRES_PASSWORD: uniflow_demo_only
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uniflow -d uniflow"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment: &backend-env
+      APP_ENV: ${APP_ENV:-development}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://uniflow:uniflow_demo_only@db:5432/uniflow}
+      SESSION_SECRET: ${SESSION_SECRET:-demo-session-secret-change-in-production}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      DEMO_AUTH_ENABLED: ${DEMO_AUTH_ENABLED:-true}
+      DEMO_SEED: ${DEMO_SEED:-true}
+      FILE_STORAGE_PATH: /data/uploads
+      FILE_MAX_SIZE_MB: ${FILE_MAX_SIZE_MB:-10}
+      MAX_ENABLED: ${MAX_ENABLED:-false}
+      MAX_API_BASE_URL: ${MAX_API_BASE_URL:-https://platform-api2.max.ru}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
+      MAX_WEBHOOK_SECRET: ${MAX_WEBHOOK_SECRET:-}
+      MAX_WEBAPP_AUTH_MAX_AGE_SECONDS: ${MAX_WEBAPP_AUTH_MAX_AGE_SECONDS:-3600}
+      LLM_ENABLED: ${LLM_ENABLED:-false}
+      LLM_CONFIG_PATH: /app/config/llm-profiles.yaml
+      LLM_PRIMARY_BASE_URL: ${LLM_PRIMARY_BASE_URL:-}
+      LLM_PRIMARY_API_KEY: ${LLM_PRIMARY_API_KEY:-}
+      LLM_PRIMARY_MODEL: ${LLM_PRIMARY_MODEL:-}
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    command: ["python", "-m", "app.worker"]
+    environment: *backend-env
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      api:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  postgres_data:
+  uploads:

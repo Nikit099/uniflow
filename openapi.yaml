@@ -1,0 +1,1825 @@
+openapi: 3.1.0
+info:
+  title: UniFlow API
+  description: Case management for international student administrative procedures.
+    University verification is not a government decision.
+  version: 0.1.0
+paths:
+  /api/v1/auth/demo/login:
+    post:
+      tags:
+      - auth
+      summary: Demo Login
+      operationId: demo_login_api_v1_auth_demo_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemoLogin'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserView'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/auth/max:
+    post:
+      tags:
+      - auth
+      summary: Max Login
+      operationId: max_login_api_v1_auth_max_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaxLogin'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserView'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/auth/logout:
+    post:
+      tags:
+      - auth
+      summary: Logout
+      operationId: logout_api_v1_auth_logout_post
+      parameters:
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/auth/me:
+    get:
+      tags:
+      - auth
+      summary: Me
+      operationId: me_api_v1_auth_me_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserView'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/procedures:
+    get:
+      tags:
+      - student cases
+      summary: Procedures
+      operationId: procedures_api_v1_procedures_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Procedures Api V1 Procedures Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases:
+    post:
+      tags:
+      - student cases
+      summary: Create Case
+      operationId: create_case_api_v1_cases_post
+      parameters:
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Create Case Api V1 Cases Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - student cases
+      summary: List Cases
+      operationId: list_cases_api_v1_cases_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CaseView'
+                title: Response List Cases Api V1 Cases Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases/{case_id}:
+    get:
+      tags:
+      - student cases
+      summary: Get Case
+      operationId: get_case_api_v1_cases__case_id__get
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseView'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases/{case_id}/profile:
+    patch:
+      tags:
+      - student cases
+      summary: Patch Profile
+      operationId: patch_profile_api_v1_cases__case_id__profile_patch
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfilePatch'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Patch Profile Api V1 Cases  Case Id  Profile Patch
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases/{case_id}/documents:
+    post:
+      tags:
+      - student cases
+      summary: Upload Document
+      operationId: upload_document_api_v1_cases__case_id__documents_post
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_upload_document_api_v1_cases__case_id__documents_post'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Upload Document Api V1 Cases  Case Id  Documents Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/documents/{document_id}:
+    get:
+      tags:
+      - student cases
+      summary: Download Document
+      operationId: download_document_api_v1_documents__document_id__get
+      parameters:
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Document Id
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - student cases
+      summary: Delete Document
+      operationId: delete_document_api_v1_documents__document_id__delete
+      parameters:
+      - name: document_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Document Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases/{case_id}/submit:
+    post:
+      tags:
+      - student cases
+      summary: Submit
+      operationId: submit_api_v1_cases__case_id__submit_post
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Submit Api V1 Cases  Case Id  Submit Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/cases/{case_id}/questions:
+    post:
+      tags:
+      - student cases
+      summary: Ask Staff
+      operationId: ask_staff_api_v1_cases__case_id__questions_post
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionRequest'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Ask Staff Api V1 Cases  Case Id  Questions Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/cases:
+    get:
+      tags:
+      - staff
+      summary: Queue
+      operationId: queue_api_v1_staff_cases_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Queue Api V1 Staff Cases Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/cases/{case_id}:
+    get:
+      tags:
+      - staff
+      summary: Staff Case
+      operationId: staff_case_api_v1_staff_cases__case_id__get
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Staff Case Api V1 Staff Cases  Case Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/cases/{case_id}/assign:
+    post:
+      tags:
+      - staff
+      summary: Assign
+      operationId: assign_api_v1_staff_cases__case_id__assign_post
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Assign Api V1 Staff Cases  Case Id  Assign Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/requirements/{item_id}/accept:
+    post:
+      tags:
+      - staff
+      summary: Accept
+      operationId: accept_api_v1_staff_requirements__item_id__accept_post
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Item Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Accept Api V1 Staff Requirements  Item Id  Accept
+                  Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/requirements/{item_id}/request-changes:
+    post:
+      tags:
+      - staff
+      summary: Request Changes
+      operationId: request_changes_api_v1_staff_requirements__item_id__request_changes_post
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Item Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Request Changes Api V1 Staff Requirements  Item Id  Request
+                  Changes Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/requirements/{item_id}/not-applicable:
+    post:
+      tags:
+      - staff
+      summary: Not Applicable
+      operationId: not_applicable_api_v1_staff_requirements__item_id__not_applicable_post
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Item Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Not Applicable Api V1 Staff Requirements  Item Id  Not
+                  Applicable Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/cases/{case_id}/verify:
+    post:
+      tags:
+      - staff
+      summary: Verify
+      operationId: verify_api_v1_staff_cases__case_id__verify_post
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Verify Api V1 Staff Cases  Case Id  Verify Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/cases/{case_id}/external-events:
+    post:
+      tags:
+      - staff
+      summary: External Event
+      operationId: external_event_api_v1_staff_cases__case_id__external_events_post
+      parameters:
+      - name: case_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Case Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExternalEventRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response External Event Api V1 Staff Cases  Case Id  External
+                  Events Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/staff/summary:
+    get:
+      tags:
+      - staff
+      summary: Summary
+      operationId: summary_api_v1_staff_summary_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                title: Response Summary Api V1 Staff Summary Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/demo-notifications:
+    get:
+      tags:
+      - organization admin
+      summary: Demo Notifications
+      operationId: demo_notifications_api_v1_admin_demo_notifications_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Demo Notifications Api V1 Admin Demo Notifications
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/sources:
+    get:
+      tags:
+      - organization admin
+      summary: Sources
+      operationId: sources_api_v1_admin_sources_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Sources Api V1 Admin Sources Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - organization admin
+      summary: Create Source
+      operationId: create_source_api_v1_admin_sources_post
+      parameters:
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SourceInput'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Create Source Api V1 Admin Sources Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/procedures:
+    get:
+      tags:
+      - organization admin
+      summary: Procedures
+      operationId: procedures_api_v1_admin_procedures_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+                title: Response Procedures Api V1 Admin Procedures Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/procedures/import:
+    post:
+      tags:
+      - organization admin
+      summary: Import Procedure
+      operationId: import_procedure_api_v1_admin_procedures_import_post
+      parameters:
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcedureImport'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Import Procedure Api V1 Admin Procedures Import Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/procedures/{version_id}/activate:
+    post:
+      tags:
+      - organization admin
+      summary: Activate
+      operationId: activate_api_v1_admin_procedures__version_id__activate_post
+      parameters:
+      - name: version_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Version Id
+      - name: x-csrf-token
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Csrf-Token
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                title: Response Activate Api V1 Admin Procedures  Version Id  Activate
+                  Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/metrics:
+    get:
+      tags:
+      - organization admin
+      summary: Metrics
+      operationId: metrics_api_v1_admin_metrics_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Metrics Api V1 Admin Metrics Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/ai-config:
+    get:
+      tags:
+      - organization admin
+      summary: Ai Config
+      operationId: ai_config_api_v1_admin_ai_config_get
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Ai Config Api V1 Admin Ai Config Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ai/explain-requirement:
+    post:
+      tags:
+      - grounded AI
+      summary: Explain
+      operationId: explain_api_v1_ai_explain_requirement_post
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExplainRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Explain Api V1 Ai Explain Requirement Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ai/question:
+    post:
+      tags:
+      - grounded AI
+      summary: Question
+      operationId: question_api_v1_ai_question_post
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Question Api V1 Ai Question Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ai/case-summary:
+    post:
+      tags:
+      - grounded AI
+      summary: Case Summary
+      operationId: case_summary_api_v1_ai_case_summary_post
+      parameters:
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Case Summary Api V1 Ai Case Summary Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/sources/{source_id}:
+    get:
+      tags:
+      - sources
+      summary: Source
+      operationId: source_api_v1_sources__source_id__get
+      parameters:
+      - name: source_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Source Id
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Source Api V1 Sources  Source Id  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/integrations/max/webhook:
+    post:
+      tags:
+      - MAX
+      summary: Webhook
+      operationId: webhook_api_v1_integrations_max_webhook_post
+      parameters:
+      - name: x-max-bot-api-secret
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: X-Max-Bot-Api-Secret
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Update
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /health/live:
+    get:
+      tags:
+      - health
+      summary: Live
+      operationId: live_health_live_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Live Health Live Get
+  /health/ready:
+    get:
+      tags:
+      - health
+      summary: Ready
+      operationId: ready_health_ready_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Ready Health Ready Get
+components:
+  schemas:
+    AcceptRequest:
+      properties:
+        version:
+          type: integer
+          title: Version
+      type: object
+      required:
+      - version
+      title: AcceptRequest
+    Body_upload_document_api_v1_cases__case_id__documents_post:
+      properties:
+        case_requirement_id:
+          type: string
+          title: Case Requirement Id
+        document_type:
+          type: string
+          title: Document Type
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - case_requirement_id
+      - document_type
+      - file
+      title: Body_upload_document_api_v1_cases__case_id__documents_post
+    CaseCreate:
+      properties:
+        procedure_version_id:
+          type: string
+          title: Procedure Version Id
+      type: object
+      required:
+      - procedure_version_id
+      title: CaseCreate
+    CaseView:
+      properties:
+        id:
+          type: string
+          title: Id
+        status:
+          type: string
+          title: Status
+        version:
+          type: integer
+          title: Version
+        procedure_version_id:
+          type: string
+          title: Procedure Version Id
+        assigned_staff_user_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Assigned Staff User Id
+        submitted_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Submitted At
+        verified_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Verified At
+        due_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Due At
+        risk_level:
+          type: string
+          title: Risk Level
+        progress:
+          type: integer
+          title: Progress
+        student_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Student Name
+        procedure_title:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          title: Procedure Title
+        requirements:
+          items:
+            $ref: '#/components/schemas/RequirementView'
+          type: array
+          title: Requirements
+          default: []
+      type: object
+      required:
+      - id
+      - status
+      - version
+      - procedure_version_id
+      - assigned_staff_user_id
+      - submitted_at
+      - verified_at
+      - due_at
+      - risk_level
+      - progress
+      title: CaseView
+    DemoLogin:
+      properties:
+        role:
+          type: string
+          title: Role
+      type: object
+      required:
+      - role
+      title: DemoLogin
+    ExplainRequest:
+      properties:
+        case_requirement_id:
+          type: string
+          title: Case Requirement Id
+        language:
+          type: string
+          title: Language
+          default: ru
+      type: object
+      required:
+      - case_requirement_id
+      title: ExplainRequest
+    ExternalEventRequest:
+      properties:
+        note:
+          type: string
+          maxLength: 1000
+          minLength: 3
+          title: Note
+      type: object
+      required:
+      - note
+      title: ExternalEventRequest
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    MaxLogin:
+      properties:
+        init_data:
+          type: string
+          title: Init Data
+      type: object
+      required:
+      - init_data
+      title: MaxLogin
+    ProcedureImport:
+      properties:
+        code:
+          type: string
+          title: Code
+        title_i18n:
+          additionalProperties:
+            type: string
+          type: object
+          title: Title I18N
+        description_i18n:
+          additionalProperties:
+            type: string
+          type: object
+          title: Description I18N
+        applicability_rule:
+          additionalProperties: true
+          type: object
+          title: Applicability Rule
+        steps:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Steps
+      type: object
+      required:
+      - code
+      - title_i18n
+      - description_i18n
+      - applicability_rule
+      - steps
+      title: ProcedureImport
+    ProfilePatch:
+      properties:
+        preferred_language:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Preferred Language
+        citizenship:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Citizenship
+        education_status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Education Status
+        study_form:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Study Form
+        visa_requirement:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Visa Requirement
+        residence_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Residence Type
+        arrival_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Arrival Date
+        visa_expiration_date:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Visa Expiration Date
+        tuition_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tuition Type
+      type: object
+      title: ProfilePatch
+    QuestionRequest:
+      properties:
+        question:
+          type: string
+          maxLength: 2000
+          minLength: 2
+          title: Question
+      type: object
+      required:
+      - question
+      title: QuestionRequest
+    RequirementView:
+      properties:
+        id:
+          type: string
+          title: Id
+        status:
+          type: string
+          title: Status
+        version:
+          type: integer
+          title: Version
+        student_comment:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Student Comment
+        staff_comment:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Staff Comment
+        requirement:
+          additionalProperties: true
+          type: object
+          title: Requirement
+        documents:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Documents
+      type: object
+      required:
+      - id
+      - status
+      - version
+      - student_comment
+      - staff_comment
+      - requirement
+      - documents
+      title: RequirementView
+    ReviewRequest:
+      properties:
+        version:
+          type: integer
+          title: Version
+        reason:
+          type: string
+          maxLength: 2000
+          minLength: 3
+          title: Reason
+        reason_code:
+          type: string
+          title: Reason Code
+          default: other
+      type: object
+      required:
+      - version
+      - reason
+      title: ReviewRequest
+    SourceInput:
+      properties:
+        title:
+          type: string
+          title: Title
+        issuer:
+          type: string
+          title: Issuer
+        url:
+          type: string
+          title: Url
+        excerpt:
+          type: string
+          title: Excerpt
+        status:
+          type: string
+          title: Status
+          default: DRAFT
+      type: object
+      required:
+      - title
+      - issuer
+      - url
+      - excerpt
+      title: SourceInput
+    UserView:
+      properties:
+        id:
+          type: string
+          title: Id
+        display_name:
+          type: string
+          title: Display Name
+        email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Email
+        preferred_language:
+          type: string
+          title: Preferred Language
+        role:
+          type: string
+          title: Role
+        organization_id:
+          type: string
+          title: Organization Id
+        csrf_token:
+          type: string
+          title: Csrf Token
+      type: object
+      required:
+      - id
+      - display_name
+      - email
+      - preferred_language
+      - role
+      - organization_id
+      - csrf_token
+      title: UserView
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

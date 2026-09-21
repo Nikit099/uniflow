@@ -10,10 +10,9 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!(init.body instanceof FormData)) headers.set('Content-Type', 'application/json')
   if (init.method && init.method !== 'GET') headers.set('X-CSRF-Token', csrf)
   const response = await fetch(`/api/v1${path}`, { ...init, headers, credentials: 'include' })
-  if (!response.ok) { const data = await response.json().catch(() => null) as { detail?: string } | null; throw new Error(data?.detail || `HTTP ${response.status}`) }
+  if (!response.ok) { const data = await response.json().catch(() => null) as { detail?: string; error?: {message?: string} } | null; throw new Error(data?.error?.message || data?.detail || `HTTP ${response.status}`) }
   if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
 }
 
 export const localize = (value: Record<string,string> | null | undefined, language: string) => value?.[language] || value?.ru || ''
-

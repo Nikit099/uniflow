@@ -13,7 +13,9 @@ from app.db import (
     AuditLog,
     Case,
     CaseRequirement,
+    Comment,
     Document,
+    NotificationOutbox,
     ProcedureTemplate,
     ProcedureVersion,
     StudentProfile,
@@ -21,10 +23,19 @@ from app.db import (
     get_db,
 )
 from app.integrations.storage import FileSystemStorage
-from app.schemas import CaseCreate, CaseView, ProfilePatch, RequirementView
+from app.schemas import CaseCreate, CaseView, ProfilePatch, QuestionRequest, RequirementView
 from app.services.cases import instantiate_requirements, load_case, submit_case
 
 router = APIRouter(tags=["student cases"])
+
+
+def valid_file_signature(content_type: str, data: bytes) -> bool:
+    signatures = {
+        "application/pdf": (b"%PDF-",),
+        "image/jpeg": (b"\xff\xd8\xff",),
+        "image/png": (b"\x89PNG\r\n\x1a\n",),
+    }
+    return any(data.startswith(signature) for signature in signatures.get(content_type, ()))
 
 
 def requirement_view(item: CaseRequirement) -> RequirementView:
@@ -220,6 +231,11 @@ async def upload_document(
     data = await file.read(settings.file_max_size_mb * 1024 * 1024 + 1)
     if len(data) > settings.file_max_size_mb * 1024 * 1024:
         raise HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "File is too large")
+    if not valid_file_signature(file.content_type, data):
+        raise HTTPException(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            "File content does not match MIME type",
+        )
     case = await load_case(db, case_id, actor.organization_id)
     if case.student_user_id != actor.user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Case not found")
@@ -244,6 +260,7 @@ async def upload_document(
         sha256=digest,
     )
     db.add(doc)
+    await db.flush()
     item.status = "SUBMITTED"
     item.version += 1
     db.add(
@@ -323,3 +340,33 @@ async def submit(
     await submit_case(db, case)
     await db.commit()
     return {"status": case.status}
+
+
+@router.post("/cases/{case_id}/questions", status_code=201)
+async def ask_staff(
+    case_id: str,
+    body: QuestionRequest,
+    actor: Actor = Depends(mutation_roles("STUDENT")),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    case = await load_case(db, case_id, actor.organization_id)
+    if case.student_user_id != actor.user.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Case not found")
+    comment = Comment(
+        case_id=case.id,
+        author_user_id=actor.user.id,
+        body=body.question,
+        visibility="STUDENT",
+    )
+    db.add(comment)
+    await db.flush()
+    if case.assigned_staff_user_id:
+        db.add(
+            NotificationOutbox(
+                event_type="STAFF_MESSAGE",
+                recipient_user_id=case.assigned_staff_user_id,
+                payload={"case_id": case.id, "comment_id": comment.id},
+            )
+        )
+    await db.commit()
+    return {"id": comment.id}

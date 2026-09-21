@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     max_enabled: bool = False
     max_api_base_url: str = "https://platform-api2.max.ru"
     max_bot_token: str = ""
+    max_webhook_secret: str = ""
     max_webapp_auth_max_age_seconds: int = 3600
     llm_enabled: bool = False
     llm_config_path: Path = Path("../../config/llm-profiles.yaml")
@@ -45,6 +46,8 @@ class Settings(BaseSettings):
                 errors.append("PUBLIC_BASE_URL must use HTTPS")
             if "demo_only" in self.database_url:
                 errors.append("demo database password is forbidden")
+            if self.max_enabled and len(self.max_webhook_secret) < 5:
+                errors.append("MAX_WEBHOOK_SECRET is required when MAX is enabled")
             if errors:
                 raise ValueError("Unsafe production configuration: " + "; ".join(errors))
         return self

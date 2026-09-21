@@ -1,0 +1,8 @@
+[
+  {"id":"synthetic-student-complete","name":"Алекс Ли","scenario":"complete","origin":"SYNTHETIC_DEMO"},
+  {"id":"synthetic-student-missing","name":"Мина Пак","scenario":"missing_document","origin":"SYNTHETIC_DEMO"},
+  {"id":"synthetic-student-changes","name":"Самир Нур","scenario":"changes_requested","origin":"SYNTHETIC_DEMO"},
+  {"id":"synthetic-student-verified","name":"Лина Чен","scenario":"verified","origin":"SYNTHETIC_DEMO"},
+  {"id":"synthetic-student-unsupported","name":"Даниэль Ким","scenario":"private_accommodation","origin":"SYNTHETIC_DEMO"}
+]
+

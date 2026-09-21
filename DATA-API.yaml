@@ -1,0 +1,65 @@
+config_version: "1.0"
+solution:
+  name: UniFlow
+  base_api: /api/v1
+  description: University-side case management for international student procedures
+mandatory_checks:
+  - id: health
+    method: GET
+    path: /health/ready
+    role: anonymous
+    expected_status_codes: [200, 503]
+    response_shape: {status: string}
+  - id: demo_login
+    method: POST
+    path: /auth/demo/login
+    role: demo
+    parameters: {role: "student|staff|org_admin"}
+    expected_status_codes: [200, 404, 422]
+    response_shape: {id: uuid, role: string, organization_id: uuid, csrf_token: string}
+  - id: list_procedures
+    method: GET
+    path: /procedures
+    role: STUDENT
+    expected_status_codes: [200, 401]
+    response_shape: [{id: uuid, version: integer, title_i18n: object}]
+  - id: create_case
+    method: POST
+    path: /cases
+    role: STUDENT
+    parameters: {procedure_version_id: uuid}
+    expected_status_codes: [200, 201, 403, 404]
+    response_shape: {id: uuid}
+  - id: upload_document
+    method: POST
+    path: /cases/{case_id}/documents
+    role: STUDENT
+    parameters: {case_requirement_id: uuid, document_type: string, file: binary}
+    expected_status_codes: [201, 403, 404, 413, 415]
+    response_shape: {id: uuid}
+  - id: submit_case
+    method: POST
+    path: /cases/{case_id}/submit
+    role: STUDENT
+    expected_status_codes: [200, 400, 403, 404, 409]
+    response_shape: {status: READY_FOR_REVIEW}
+  - id: request_changes
+    method: POST
+    path: /staff/requirements/{id}/request-changes
+    role: STAFF
+    parameters: {version: integer, reason: string, reason_code: string}
+    expected_status_codes: [200, 403, 404, 409]
+    response_shape: {status: CHANGES_REQUESTED, version: integer}
+  - id: verify_case
+    method: POST
+    path: /staff/cases/{case_id}/verify
+    role: STAFF
+    expected_status_codes: [200, 400, 403, 404, 409]
+    response_shape: {status: VERIFIED_BY_UNIVERSITY}
+  - id: grounded_explanation
+    method: POST
+    path: /ai/explain-requirement
+    role: STUDENT
+    expected_status_codes: [200, 404, 503]
+    response_shape: {answer: string, source_ids: [uuid], uncertainty: string, needs_human: boolean}
+

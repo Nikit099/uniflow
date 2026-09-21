@@ -8,6 +8,8 @@ from app.api.deps import Actor, mutation_roles, require_roles
 from app.db import (
     AuditLog,
     Case,
+    DemoNotification,
+    Membership,
     OfficialSource,
     ProcedureStep,
     ProcedureTemplate,
@@ -19,6 +21,32 @@ from app.domain.rules import InvalidRule, evaluate_rule
 from app.schemas import ProcedureImport, SourceInput
 
 router = APIRouter(prefix="/admin", tags=["organization admin"])
+
+
+@router.get("/demo-notifications")
+async def demo_notifications(
+    actor: Actor = Depends(require_roles("ORG_ADMIN")),
+    db: AsyncSession = Depends(get_db),
+) -> list[dict[str, object]]:
+    rows = (
+        await db.scalars(
+            select(DemoNotification)
+            .join(Membership, Membership.user_id == DemoNotification.recipient_user_id)
+            .where(Membership.organization_id == actor.organization_id)
+            .order_by(DemoNotification.created_at.desc())
+            .limit(50)
+        )
+    ).all()
+    return [
+        {
+            "id": row.id,
+            "event_type": row.event_type,
+            "payload": row.payload,
+            "created_at": row.created_at,
+            "label": "Локальная имитация MAX",
+        }
+        for row in rows
+    ]
 
 
 @router.get("/sources")

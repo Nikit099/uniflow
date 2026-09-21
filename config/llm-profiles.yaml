@@ -1,0 +1,21 @@
+providers:
+  primary:
+    type: openai_compatible
+    base_url_env: LLM_PRIMARY_BASE_URL
+    api_key_env: LLM_PRIMARY_API_KEY
+    models_from_env: LLM_PRIMARY_MODEL
+
+pipelines:
+  requirement_explainer:
+    provider: primary
+    prompt: requirement_explainer_v1
+  student_question_router:
+    provider: primary
+    prompt: student_router_v1
+  staff_case_summary:
+    provider: primary
+    prompt: case_summary_v1
+  plain_language_translation:
+    provider: primary
+    prompt: plain_language_v1
+
