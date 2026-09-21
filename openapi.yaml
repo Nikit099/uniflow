@@ -1059,6 +1059,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/admin/procedures/{version_id}/export:
+    get:
+      tags:
+      - organization admin
+      summary: Export Procedure
+      operationId: export_procedure_api_v1_admin_procedures__version_id__export_get
+      parameters:
+      - name: version_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Version Id
+      - name: uniflow_session
+        in: cookie
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Uniflow Session
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Export Procedure Api V1 Admin Procedures  Version
+                  Id  Export Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/admin/procedures/import:
     post:
       tags:

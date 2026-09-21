@@ -12,7 +12,7 @@ docker compose up --build
 
 Откройте [http://localhost:8080](http://localhost:8080). Миграции и идемпотентный demo seed выполняются автоматически. Реальные MAX- и LLM-секреты для локального сценария не нужны.
 
-Если `8080` занят, используйте `WEB_PORT=18080 docker compose up --build` и откройте `http://localhost:18080`.
+Если `8080` занят, используйте `WEB_PORT=18080 docker compose up --build` и откройте `http://localhost:18080`. Для другого порта добавьте origin через `ALLOWED_ORIGINS`.
 
 ## Что реализовано
 

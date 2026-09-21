@@ -128,6 +128,67 @@ async def procedures(
     ]
 
 
+@router.get("/procedures/{version_id}/export")
+async def export_procedure(
+    version_id: str,
+    actor: Actor = Depends(require_roles("ORG_ADMIN")),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, object]:
+    version = await db.scalar(
+        select(ProcedureVersion).where(
+            ProcedureVersion.id == version_id,
+            ProcedureVersion.organization_id == actor.organization_id,
+        )
+    )
+    if not version:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Procedure version not found")
+    template = await db.get(ProcedureTemplate, version.procedure_template_id)
+    assert template is not None
+    steps = (
+        await db.scalars(
+            select(ProcedureStep)
+            .where(ProcedureStep.procedure_version_id == version.id)
+            .order_by(ProcedureStep.sort_order)
+        )
+    ).all()
+    result_steps: list[dict[str, object]] = []
+    for step in steps:
+        requirements = (
+            await db.scalars(
+                select(Requirement)
+                .where(Requirement.procedure_step_id == step.id)
+                .order_by(Requirement.sort_order)
+            )
+        ).all()
+        result_steps.append(
+            {
+                "code": step.code,
+                "title_i18n": step.title_i18n,
+                "requirements": [
+                    {
+                        "code": requirement.code,
+                        "title_i18n": requirement.title_i18n,
+                        "description_i18n": requirement.description_i18n,
+                        "requirement_type": requirement.requirement_type,
+                        "mandatory": requirement.mandatory,
+                        "conditions": requirement.conditions,
+                        "source_ids": requirement.source_ids,
+                        "student_action_i18n": requirement.student_action_i18n,
+                        "staff_action_i18n": requirement.staff_action_i18n,
+                    }
+                    for requirement in requirements
+                ],
+            }
+        )
+    return {
+        "code": template.code,
+        "title_i18n": template.title_i18n,
+        "description_i18n": template.description_i18n,
+        "applicability_rule": version.applicability_rule,
+        "steps": result_steps,
+    }
+
+
 @router.post("/procedures/import", status_code=201)
 async def import_procedure(
     body: ProcedureImport,
