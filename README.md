@@ -102,7 +102,7 @@ Copy `.env.example` only when overriding defaults. Key settings:
 - `DEMO_MODE`, `DEMO_AUTH_ENABLED`, `DEMO_SEED`
 - `FILE_STORAGE_PATH`, `FILE_MAX_SIZE_MB`
 - `MAX_ENABLED`, `MAX_API_BASE_URL`, `MAX_BOT_TOKEN`, `MAX_WEBHOOK_SECRET`, `MAX_WEBAPP_AUTH_MAX_AGE_SECONDS`
-- `LLM_ENABLED`, `LLM_PRIMARY_BASE_URL`, `LLM_PRIMARY_API_KEY`, `LLM_PRIMARY_MODEL`
+- `LLM_ENABLED`, `LLM_PROVIDER`, and the variables for the selected provider below
 
 Production startup rejects the default session secret, demo features, non-HTTPS public URL and known demo database credentials.
 
@@ -121,7 +121,11 @@ Without a token the local fake adapter stores notifications as explicitly labell
 
 ## LLM integration
 
-AI functionality requires an OpenAI-compatible endpoint. Set `LLM_ENABLED=true`, base URL, key and allowlisted model. Secrets remain in environment variables and are never returned to the browser.
+AI is opt-in. Secrets stay in environment variables (or deployment secret storage), are never sent to the browser and must not be committed.
+
+The default prepared provider is GigaChat. Set `LLM_ENABLED=true`, `LLM_PROVIDER=gigachat` and `LLM_GIGACHAT_AUTHORIZATION_KEY`; the backend obtains and refreshes GigaChat's short-lived access token itself. `LLM_GIGACHAT_MODEL` defaults to `GigaChat-3-Ultra` and should be adjusted to a model available to the account.
+
+To cut over to RouterAI, revoke/delete the GigaChat authorization key in its cabinet, remove `LLM_GIGACHAT_AUTHORIZATION_KEY` from the deployment secret, then set `LLM_PROVIDER=routerai`, `LLM_ROUTERAI_API_KEY` and the exact `LLM_ROUTERAI_MODEL` identifier from RouterAI's catalogue (for example, the selected DeepSeek model). Restart only the `api` service: `docker compose up -d --no-deps --force-recreate api`. RouterAI uses its OpenAI-compatible Chat Completions endpoint.
 
 The workflow remains fully usable when AI is disabled or times out. AI cannot mutate status, accept/reject documents, change deadlines, verify sources or assert government actions. Details: [docs/ai.md](docs/ai.md).
 

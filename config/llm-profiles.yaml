@@ -4,6 +4,18 @@ providers:
     base_url_env: LLM_PRIMARY_BASE_URL
     api_key_env: LLM_PRIMARY_API_KEY
     models_from_env: LLM_PRIMARY_MODEL
+  gigachat:
+    type: gigachat_oauth
+    authorization_key_env: LLM_GIGACHAT_AUTHORIZATION_KEY
+    scope_env: LLM_GIGACHAT_SCOPE
+    base_url_env: LLM_GIGACHAT_BASE_URL
+    oauth_url_env: LLM_GIGACHAT_OAUTH_URL
+    models_from_env: LLM_GIGACHAT_MODEL
+  routerai:
+    type: openai_compatible
+    base_url_env: LLM_ROUTERAI_BASE_URL
+    api_key_env: LLM_ROUTERAI_API_KEY
+    models_from_env: LLM_ROUTERAI_MODEL
 
 pipelines:
   requirement_explainer:
@@ -18,4 +30,3 @@ pipelines:
   plain_language_translation:
     provider: primary
     prompt: plain_language_v1
-
