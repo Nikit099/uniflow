@@ -5,12 +5,20 @@ export type Case = { id: string; status: string; version: number; procedure_vers
 
 let csrf = ''
 export function setCsrf(value: string) { csrf = value }
+
+export class ApiError extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers)
   if (!(init.body instanceof FormData)) headers.set('Content-Type', 'application/json')
   if (init.method && init.method !== 'GET') headers.set('X-CSRF-Token', csrf)
   const response = await fetch(`/api/v1${path}`, { ...init, headers, credentials: 'include' })
-  if (!response.ok) { const data = await response.json().catch(() => null) as { detail?: string; error?: {message?: string} } | null; throw new Error(data?.error?.message || data?.detail || `HTTP ${response.status}`) }
+  if (!response.ok) { const data = await response.json().catch(() => null) as { detail?: string; error?: {message?: string} } | null; throw new ApiError(response.status, data?.error?.message || data?.detail || `HTTP ${response.status}`) }
   if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
 }

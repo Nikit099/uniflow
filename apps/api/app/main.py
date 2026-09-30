@@ -41,7 +41,7 @@ async def request_context(request: Request, call_next):  # type: ignore[no-untyp
         "/api/v1/integrations/max/webhook": 120,
     }
     limit = (
-        30 if request.url.path.startswith("/api/v1/ai/") else sensitive_limits.get(request.url.path)
+        120 if request.url.path.startswith("/api/v1/ai/") else sensitive_limits.get(request.url.path)
     )
     if limit and not limiter.allow(f"{client_ip}:{request.url.path}", limit):
         return JSONResponse(

@@ -14,8 +14,8 @@ mandatory_checks:
     method: POST
     path: /auth/demo/login
     role: demo
-    parameters: {role: "student|staff|org_admin"}
-    expected_status_codes: [200, 404, 422]
+    parameters: {username: "student|staff|admin", password: string}
+    expected_status_codes: [200, 401, 404, 422, 503]
     response_shape: {id: uuid, role: string, organization_id: uuid, csrf_token: string}
   - id: list_procedures
     method: GET
@@ -62,4 +62,3 @@ mandatory_checks:
     role: STUDENT
     expected_status_codes: [200, 404, 503]
     response_shape: {answer: string, source_ids: [uuid], uncertainty: string, needs_human: boolean}
-

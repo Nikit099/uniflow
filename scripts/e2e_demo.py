@@ -3,8 +3,10 @@ import sys
 import httpx
 
 
-def login(client: httpx.Client, role: str) -> str:
-    response = client.post("/api/v1/auth/demo/login", json={"role": role})
+def login(client: httpx.Client, username: str, password: str) -> str:
+    response = client.post(
+        "/api/v1/auth/demo/login", json={"username": username, "password": password}
+    )
     response.raise_for_status()
     return str(response.json()["csrf_token"])
 
@@ -13,8 +15,8 @@ def main() -> None:
     base_url = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080"
     student = httpx.Client(base_url=base_url)
     staff = httpx.Client(base_url=base_url)
-    student_csrf = login(student, "student")
-    staff_csrf = login(staff, "staff")
+    student_csrf = login(student, "student", "student123")
+    staff_csrf = login(staff, "staff", "staff123")
     student_headers = {"X-CSRF-Token": student_csrf}
     staff_headers = {"X-CSRF-Token": staff_csrf}
 

@@ -86,13 +86,13 @@ make demo-reset
 
 ## Demo accounts
 
-These are local synthetic test credentials. `/demo-login` performs role selection without a password and exists only when `APP_ENV != production` and `DEMO_AUTH_ENABLED=true`.
+These accounts contain only synthetic data. In production, password login remains disabled unless `DEMO_AUTH_ENABLED=true` is explicitly set; `DEMO_MODE` must remain `false`. Enabling demo login exposes the listed demo accounts to anyone who can reach the site, so use it only for a dedicated demo deployment or hackathon showcase.
 
-| Role | Account | Demo password for fixtures |
+| Role | Login | Password |
 |---|---|---|
-| Student | `student@demo.local` | `demo-only-password` |
-| Staff | `staff@demo.local` | `demo-only-password` |
-| Organization admin | `admin@demo.local` | `demo-only-password` |
+| Student | `student` | `student123` |
+| Staff | `staff` | `staff123` |
+| Organization admin | `admin` | `admin123` |
 
 ## Environment variables
 
@@ -101,7 +101,7 @@ Copy `.env.example` only when overriding defaults. Key settings:
 - `APP_ENV`, `PUBLIC_BASE_URL`, `DATABASE_URL`, `SESSION_SECRET`
 - `DEMO_MODE`, `DEMO_AUTH_ENABLED`, `DEMO_SEED`
 - `FILE_STORAGE_PATH`, `FILE_MAX_SIZE_MB`
-- `MAX_ENABLED`, `MAX_API_BASE_URL`, `MAX_BOT_TOKEN`, `MAX_WEBHOOK_SECRET`, `MAX_WEBAPP_AUTH_MAX_AGE_SECONDS`
+- `MAX_ENABLED`, `MAX_API_BASE_URL`, `MAX_BOT_USERNAME`, `MAX_BOT_TOKEN`, `MAX_WEBHOOK_SECRET`, `MAX_WEBAPP_AUTH_MAX_AGE_SECONDS`
 - `LLM_ENABLED`, `LLM_PROVIDER`, and the variables for the selected provider below
 
 Production startup rejects the default session secret, demo features, non-HTTPS public URL and known demo database credentials.
@@ -113,9 +113,9 @@ The real adapter targets `https://platform-api2.max.ru`, sends the bot token onl
 To connect MAX:
 
 1. Create a bot and Mini App in the MAX partner platform.
-2. Set an HTTPS `PUBLIC_BASE_URL`, `MAX_ENABLED=true`, `MAX_BOT_TOKEN` and `MAX_WEBHOOK_SECRET`.
+2. Set an HTTPS `PUBLIC_BASE_URL`, `MAX_ENABLED=true`, `MAX_BOT_USERNAME`, `MAX_BOT_TOKEN` and `MAX_WEBHOOK_SECRET`.
 3. Register `POST /api/v1/integrations/max/webhook` as the webhook and enable `bot_started`/`message_created` events.
-4. Configure the Mini App URL and use a case-safe opaque `start_param` such as `case_ab12cd`.
+4. Configure the Mini App URL. The bot opens cases through `https://max.ru/<bot-username>?startapp=case_<uuid>`; the Mini App parses the start parameter and the API verifies case ownership.
 
 Without a token the local fake adapter stores notifications as explicitly labelled local simulation; no MAX delivery is claimed. Details: [docs/max-integration.md](docs/max-integration.md).
 

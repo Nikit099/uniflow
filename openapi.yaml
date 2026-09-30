@@ -1575,12 +1575,20 @@ components:
       title: CaseView
     DemoLogin:
       properties:
-        role:
+        username:
           type: string
-          title: Role
+          maxLength: 64
+          minLength: 1
+          title: Username
+        password:
+          type: string
+          maxLength: 128
+          minLength: 1
+          title: Password
       type: object
       required:
-      - role
+      - username
+      - password
       title: DemoLogin
     ExplainRequest:
       properties:

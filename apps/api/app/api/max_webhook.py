@@ -1,5 +1,6 @@
 import hmac
 from typing import Any
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
 from sqlalchemy import select
@@ -34,13 +35,19 @@ def _text(update: dict[str, Any]) -> str:
 def _open_attachment(
     settings: Settings, label: str, case_id: str | None = None
 ) -> list[dict[str, object]]:
-    suffix = f"?startapp=case_{case_id[:8]}" if case_id else ""
+    bot_username = settings.max_bot_username.removeprefix("@")
+    base_url = (
+        f"https://max.ru/{quote(bot_username, safe='')}"
+        if bot_username
+        else settings.public_base_url.rstrip("/")
+    )
+    suffix = f"?startapp=case_{case_id}" if case_id else "?startapp"
     return [
         {
             "type": "inline_keyboard",
             "payload": {
                 "buttons": [
-                    [{"type": "link", "text": label, "url": f"{settings.public_base_url}/{suffix}"}]
+                    [{"type": "link", "text": label, "url": f"{base_url}{suffix}"}]
                 ]
             },
         }

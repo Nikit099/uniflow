@@ -1,3 +1,4 @@
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -21,6 +22,7 @@ class Settings(BaseSettings):
     file_max_size_mb: int = 10
     max_enabled: bool = False
     max_api_base_url: str = "https://platform-api2.max.ru"
+    max_bot_username: str = ""
     max_bot_token: str = ""
     max_webhook_secret: str = ""
     max_webapp_auth_max_age_seconds: int = 3600
@@ -70,16 +72,21 @@ class Settings(BaseSettings):
                 or len(self.session_secret) < 32
             ):
                 errors.append("SESSION_SECRET must be a strong non-default value")
-            if self.demo_auth_enabled or self.demo_mode:
-                errors.append("demo features must be disabled")
+            if self.demo_mode:
+                errors.append("DEMO_MODE must be disabled in production")
             if not self.public_base_url.startswith("https://"):
                 errors.append("PUBLIC_BASE_URL must use HTTPS")
             if "demo_only" in self.database_url:
                 errors.append("demo database password is forbidden")
             if self.max_enabled and len(self.max_webhook_secret) < 5:
                 errors.append("MAX_WEBHOOK_SECRET is required when MAX is enabled")
+            if self.max_enabled and not self.max_bot_username:
+                errors.append("MAX_BOT_USERNAME is required when MAX is enabled")
             if errors:
                 raise ValueError("Unsafe production configuration: " + "; ".join(errors))
+        bot_username = self.max_bot_username.removeprefix("@")
+        if bot_username and not re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", bot_username):
+            raise ValueError("MAX_BOT_USERNAME must be a bot name, not a URL")
         return self
 
     @property

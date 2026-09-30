@@ -3,8 +3,8 @@ import { expect, request, test } from '@playwright/test'
 test('student correction and university verification flow', async ({ baseURL }) => {
   const student = await request.newContext({ baseURL })
   const staff = await request.newContext({ baseURL })
-  const studentLogin = await student.post('/api/v1/auth/demo/login', { data: { role: 'student' } })
-  const staffLogin = await staff.post('/api/v1/auth/demo/login', { data: { role: 'staff' } })
+  const studentLogin = await student.post('/api/v1/auth/demo/login', { data: { username: 'student', password: 'student123' } })
+  const staffLogin = await staff.post('/api/v1/auth/demo/login', { data: { username: 'staff', password: 'staff123' } })
   expect(studentLogin.ok()).toBeTruthy()
   expect(staffLogin.ok()).toBeTruthy()
   const studentCsrf = (await studentLogin.json()).csrf_token as string
@@ -13,7 +13,9 @@ test('student correction and university verification flow', async ({ baseURL }) 
   const mutateStaff = { 'X-CSRF-Token': staffCsrf }
 
   const cases = await (await student.get('/api/v1/cases')).json()
-  const caseId = cases[0].id as string
+  const inProgressCase = cases.find((item: { status: string }) => item.status === 'IN_PROGRESS')
+  expect(inProgressCase, 'demo data includes an in-progress student case').toBeTruthy()
+  const caseId = inProgressCase.id as string
   const initial = await (await student.get(`/api/v1/cases/${caseId}`)).json()
   expect(initial.status).toBe('IN_PROGRESS')
   for (const item of initial.requirements) {

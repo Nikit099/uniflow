@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerificationError
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,22 +54,36 @@ async def demo_login(
     settings: Settings = Depends(get_settings),
     db: AsyncSession = Depends(get_db),
 ) -> UserView:
-    if settings.app_env == "production" or not settings.demo_auth_enabled:
+    if not settings.demo_auth_enabled:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Not found")
     aliases = {
         "student": "student@demo.local",
         "staff": "staff@demo.local",
-        "org_admin": "admin@demo.local",
+        "admin": "admin@demo.local",
     }
-    email = aliases.get(body.role)
+    email = aliases.get(body.username.strip().lower())
     if not email:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Unknown demo role")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
     user = await db.scalar(select(User).where(User.email == email))
     if not user:
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Demo data is not initialized")
-    membership = await db.scalar(select(Membership).where(Membership.user_id == user.id))
+    password_hash = user.password_hash
+    if not password_hash:
+        valid_password = False
+    else:
+        try:
+            valid_password = password_hasher.verify(password_hash, body.password)
+        except (InvalidHashError, VerificationError):
+            valid_password = False
+    if not valid_password:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
+    membership = await db.scalar(
+        select(Membership)
+        .join(Organization, Organization.id == Membership.organization_id)
+        .where(Membership.user_id == user.id, Organization.demo.is_(True))
+    )
     if not membership:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Demo membership missing")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid username or password")
     raw, session = await _new_session(db, user.id, settings)
     await db.commit()
     _set_cookie(response, raw, settings)

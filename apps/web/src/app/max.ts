@@ -1,9 +1,17 @@
-declare global { interface Window { WebApp?: { initData?: string; platform?: string; version?: string; enableClosingConfirmation?: () => void; openLink?: (url: string) => void; start_param?: string } } }
-
-export const maxBridge = {
-  initData: () => window.WebApp?.initData || '',
-  openLink: (url: string) => window.WebApp?.openLink ? window.WebApp.openLink(url) : window.open(url, '_blank', 'noopener,noreferrer'),
-  protectUnsaved: () => window.WebApp?.enableClosingConfirmation?.(),
-  startParam: () => window.WebApp?.start_param,
+declare global {
+  interface Window {
+    WebApp?: {
+      initData?: string
+    }
+  }
 }
 
+export const maxBridge = {
+  initData: () => window.WebApp?.initData || new URLSearchParams(window.location.hash.slice(1)).get('WebAppData') || '',
+  isAvailable: () => Boolean(window.WebApp || new URLSearchParams(window.location.hash.slice(1)).has('WebAppData')),
+  startCasePath: () => {
+    const param = new URLSearchParams(maxBridge.initData()).get('start_param') || new URLSearchParams(window.location.search).get('startapp') || ''
+    const match = /^case_([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.exec(param)
+    return match ? `/cases/${match[1]}` : ''
+  },
+}
